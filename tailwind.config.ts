@@ -68,6 +68,19 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
+			backgroundImage: {
+				'gradient-morning': 'var(--gradient-morning)',
+				'gradient-coffee': 'var(--gradient-coffee)',
+				'gradient-tea': 'var(--gradient-tea)',
+				'gradient-water': 'var(--gradient-water)'
+			},
+			boxShadow: {
+				'gentle': 'var(--shadow-gentle)',
+				'warm': 'var(--shadow-warm)'
+			},
+			transitionTimingFunction: {
+				'mindful': 'var(--transition-mindful)'
+			},
 			keyframes: {
 				'accordion-down': {
 					from: {
@@ -84,11 +97,31 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
+				'gentle-bounce': {
+					'0%, 100%': {
+						transform: 'translateY(0)'
+					},
+					'50%': {
+						transform: 'translateY(-2px)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.6s ease-out',
+				'gentle-bounce': 'gentle-bounce 2s ease-in-out infinite'
 			}
 		}
 	},
