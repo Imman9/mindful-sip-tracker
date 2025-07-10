@@ -1,38 +1,101 @@
 import { useState, useEffect } from 'react';
 import { SipEntry, SipStats } from '@/types/sip';
-
-const SIP_ENTRIES_KEY = 'siptrackr-entries';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 export const useSipStorage = () => {
   const [entries, setEntries] = useState<SipEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const savedEntries = localStorage.getItem(SIP_ENTRIES_KEY);
-    if (savedEntries) {
-      setEntries(JSON.parse(savedEntries));
-    }
+    loadEntries();
   }, []);
 
-  const saveEntries = (newEntries: SipEntry[]) => {
-    setEntries(newEntries);
-    localStorage.setItem(SIP_ENTRIES_KEY, JSON.stringify(newEntries));
+  const loadEntries = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('sip_entries')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedEntries: SipEntry[] = data.map(entry => ({
+        id: entry.id,
+        date: entry.date,
+        timestamp: entry.timestamp,
+        intention: entry.intention,
+        type: entry.type as SipEntry['type'],
+      }));
+
+      setEntries(formattedEntries);
+    } catch (error) {
+      console.error('Error loading sip entries:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load sip entries. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const addSipEntry = (intention: string, type: SipEntry['type'] = 'coffee') => {
-    const today = new Date().toISOString().split('T')[0];
-    const timestamp = new Date().toISOString();
-    
-    const newEntry: SipEntry = {
-      id: `sip-${Date.now()}`,
-      date: today,
-      timestamp,
-      intention,
-      type
-    };
+  const addSipEntry = async (intention: string, type: SipEntry['type'] = 'coffee'): Promise<SipEntry | null> => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to track your sips.",
+          variant: "destructive",
+        });
+        return null;
+      }
 
-    const updatedEntries = [...entries, newEntry];
-    saveEntries(updatedEntries);
-    return newEntry;
+      const newEntry = {
+        date: new Date().toISOString().split('T')[0],
+        timestamp: new Date().toISOString(),
+        intention,
+        type,
+        user_id: user.id,
+      };
+
+      const { data, error } = await supabase
+        .from('sip_entries')
+        .insert([newEntry])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const formattedEntry: SipEntry = {
+        id: data.id,
+        date: data.date,
+        timestamp: data.timestamp,
+        intention: data.intention,
+        type: data.type as SipEntry['type'],
+      };
+
+      setEntries(prev => [formattedEntry, ...prev]);
+      
+      toast({
+        title: "Success",
+        description: "Sip entry added successfully!",
+      });
+
+      return formattedEntry;
+    } catch (error) {
+      console.error('Error adding sip entry:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add sip entry. Please try again.",
+        variant: "destructive",
+      });
+      return null;
+    }
   };
 
   const getTodaysSip = (): SipEntry | null => {
@@ -94,6 +157,7 @@ export const useSipStorage = () => {
     addSipEntry,
     getTodaysSip,
     hasSippedToday,
-    getStats
+    getStats,
+    isLoading
   };
 };

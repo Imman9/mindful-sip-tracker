@@ -41,6 +41,39 @@ export type Database = {
         }
         Relationships: []
       }
+      sip_entries: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          intention: string
+          timestamp: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          intention: string
+          timestamp?: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          intention?: string
+          timestamp?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
