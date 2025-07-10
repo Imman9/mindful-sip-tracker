@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useSipStorage } from '@/hooks/useSipStorage';
 import { TodaysStatus } from '@/components/TodaysStatus';
 import { SipForm } from '@/components/SipForm';
 import { StatsCard } from '@/components/StatsCard';
+import { Button } from '@/components/ui/button';
 import { SipEntry } from '@/types/sip';
+import { BookOpen } from 'lucide-react';
 import sipLogo from '@/assets/siptrackr-logo.png';
 
 const Index = () => {
@@ -36,6 +39,14 @@ const Index = () => {
           <h1 className="text-3xl font-bold text-primary">SipTrackr</h1>
         </div>
         <p className="text-muted-foreground">Mindfulness through your first sip</p>
+        <div className="mt-4">
+          <Button asChild variant="outline">
+            <Link to="/journal">
+              <BookOpen className="h-4 w-4 mr-2" />
+              Daily Journal
+            </Link>
+          </Button>
+        </div>
       </header>
 
       {/* Main Content */}
